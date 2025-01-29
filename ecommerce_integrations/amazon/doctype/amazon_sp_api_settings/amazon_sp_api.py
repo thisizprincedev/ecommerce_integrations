@@ -301,6 +301,10 @@ class SPAPI:
 			headers=self.get_headers(),
 			auth=self.get_auth(),
 		)
+		frappe.log_error(
+				message=f"method: {method} url: {url} params:{params} data: {data} headers: {headers} auth: {auth} Response:{response.json()}",
+				title=f'{url}',
+		)
 		return response.json()
 
 	def list_to_dict(self, key: str, values: list, data: dict) -> None:
@@ -399,6 +403,11 @@ class CatalogItems(SPAPI):
 
 		append_to_base_uri = f"/items/{asin}"
 		data = dict(MarketplaceId=marketplace_id)
+
+		frappe.log_error(
+				message=f"ASIN:{asin}marketplace_id: {marketplace_id} paramas: {data}",
+				title=f'CatalogItems',
+		)
 
 		return self.make_request(append_to_base_uri=append_to_base_uri, params=data)
 
