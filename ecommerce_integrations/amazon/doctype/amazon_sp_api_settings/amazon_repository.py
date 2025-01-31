@@ -357,15 +357,68 @@ class AmazonRepository:
 				return new_customer.name
 
 		def create_address(order, customer_name) -> str | None:
+			
+			
 			shipping_address = order.get("ShippingAddress")
 
 			if not shipping_address:
 				return
 			else:
+
+				state_mapping = {
+			        "AN": "Andaman and Nicobar Islands",
+			        "AP": "Andhra Pradesh",
+			        "AR": "Arunachal Pradesh",
+			        "AS": "Assam",
+			        "BR": "Bihar",
+			        "CH": "Chandigarh",
+			        "CG": "Chhattisgarh",
+			        "DN": "Dadra and Nagar Haveli and Daman and Diu",
+			        "DL": "Delhi",
+			        "GA": "Goa",
+			        "GJ": "Gujarat",
+			        "HR": "Haryana",
+			        "HP": "Himachal Pradesh",
+			        "JK": "Jammu and Kashmir",
+			        "JH": "Jharkhand",
+			        "KA": "Karnataka",
+			        "KL": "Kerala",
+			        "LD": "Ladakh",
+			        "LD": "Lakshadweep Islands",
+			        "MP": "Madhya Pradesh",
+			        "MH": "Maharashtra",
+			        "MN": "Manipur",
+			        "ML": "Meghalaya",
+			        "MZ": "Mizoram",
+			        "NL": "Nagaland",
+			        "OR": "Odisha",
+			        "OC": "Other Countries",
+			        "OT": "Other Territory",
+			        "PY": "Puducherry",
+			        "PB": "Punjab",
+			        "RJ": "Rajasthan",
+			        "SK": "Sikkim",
+			        "TN": "Tamil Nadu",
+			        "TG": "Telangana",
+			        "TR": "Tripura",
+			        "UP": "Uttar Pradesh",
+			        "UK": "Uttarakhand",
+			        "WB": "West Bengal",
+			    }
+
+		        state_code = shipping_address.get("StateOrRegion")
+		
+		        if state_code and state_code in state_mapping:
+		            state_name = state_mapping[state_code]
+		        else:
+		            state_name = state_code
+
+
+				
 				make_address = frappe.new_doc("Address")
 				make_address.address_line1 = shipping_address.get("AddressLine1", "Not Provided")
 				make_address.city = shipping_address.get("City", "Not Provided")
-				make_address.state = shipping_address.get("StateOrRegion").title()
+				make_address.state = state_name.title()
 				make_address.pincode = shipping_address.get("PostalCode")
 
 				filters = [
