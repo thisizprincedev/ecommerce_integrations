@@ -425,21 +425,22 @@ class AmazonRepository:
 
                 state_name = state_mapping.get(state_code, state_code)
 
+                address_full = {
+                    "state": state_name.title(),
+                    "PostalCode": shipping_address.get("PostalCode"),
+                    "City": shipping_address.get("City", "Not Provided"),
+                    "AddressLine1":  shipping_address.get(
+                        "AddressLine1", "Not Provided")
+                }
+
                 make_address = frappe.new_doc("Address")
-                make_address.address_line1 = shipping_address.get(
+                make_address.address_line1 = address_full.get(
                     "AddressLine1", "Not Provided")
                 make_address.city = shipping_address.get(
                     "City", "Not Provided")
-                make_address.state = state_name.title() if state_name else "Delhi"
+                make_address.state = address_full.get(
+                    "state", "Not Provided")
                 make_address.pincode = shipping_address.get("PostalCode")
-
-                address_full = {
-                    "state": state_name.title(),
-                    "pincode": shipping_address.get("PostalCode"),
-                    "city": shipping_address.get("City", "Not Provided"),
-                    "address_line1":  shipping_address.get(
-                        "AddressLine1", "Not Provided")
-                }
 
                 filters = [
                     ["Dynamic Link", "link_doctype", "=", "Customer"],
