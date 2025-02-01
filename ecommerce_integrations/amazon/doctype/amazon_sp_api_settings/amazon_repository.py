@@ -497,10 +497,10 @@ class AmazonRepository:
             if taxes_and_charges:
                 charges_and_fees = self.get_charges_and_fees(order_id)
 
-                for charge in charges_and_fees.get("charges"):
+                for charge in charges_and_fees.get("charges", []):
                     so.append("taxes", charge)
 
-                for fee in charges_and_fees.get("fees"):
+                for fee in charges_and_fees.get("fees", []):
                     so.append("taxes", fee)
 
             so.insert(ignore_permissions=True)
