@@ -59,8 +59,7 @@ class AmazonRepository:
                 continue
 
         for error in errors:
-            msg = f"<b>Error:</b> {
-                error}<br/><b>Error Description:</b> {errors.get(error)}"
+            msg = f"<b>Error:</b> {error}<br/><b>Error Description:</b> {errors.get(error)}"
             frappe.msgprint(msg, alert=True, indicator="red")
             frappe.log_error(
                 message=f"{error}: {errors.get(error)}",
