@@ -436,6 +436,14 @@ class AmazonRepository:
                     "City", "Not Provided")
                 make_address.state = state_name.title()
                 make_address.pincode = shipping_address.get("PostalCode")
+                
+                address_full = {
+                   "state": state_name.title(), 
+                   "pincode": shipping_address.get("PostalCode"),
+                   "city": shipping_address.get("City", "Not Provided"),
+                   "address_line1":  shipping_address.get(
+                       "AddressLine1", "Not Provided")
+                }
 
                 filters = [
                     ["Dynamic Link", "link_doctype", "=", "Customer"],
