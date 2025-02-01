@@ -11,8 +11,6 @@ from requests import request
 from requests.auth import AuthBase
 from requests.compat import urlparse
 
-import frappe
-from frappe import _
 
 __all__ = [
 	"SPAPIError",
