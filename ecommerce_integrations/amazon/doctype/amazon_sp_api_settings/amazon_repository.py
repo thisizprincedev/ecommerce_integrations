@@ -47,7 +47,7 @@ class AmazonRepository:
 		errors = {}
 		max_retries = self.amz_setting.max_retry_limit
 
-		for _x in range(max_retries):
+		for x in range(max_retries):
 			try:
 				result = sp_api_method(**kwargs)
 				return result.get("payload")
@@ -62,8 +62,7 @@ class AmazonRepository:
 			msg = f"<b>Error:</b> {error}<br/><b>Error Description:</b> {errors.get(error)}"
 			frappe.msgprint(msg, alert=True, indicator="red")
 			frappe.log_error(
-				message=f"{error}: {errors.get(error)}",
-				title=f'Method "{sp_api_method.__name__}" failed',
+				message=f"{error}: {errors.get(error)}", title=f'Method "{sp_api_method.__name__}" failed',
 			)
 
 		self.amz_setting.enable_sync = 0
@@ -77,11 +76,11 @@ class AmazonRepository:
 		return Finances(**self.instance_params)
 
 	def get_account(self, name) -> str:
-		account_name = frappe.db.get_value("Account", {"account_name": f"Amazon {name}"})
+		account_name = frappe.db.get_value("Account", {"account_name": "Amazon {0}".format(name)})
 
 		if not account_name:
 			new_account = frappe.new_doc("Account")
-			new_account.account_name = f"Amazon {name}"
+			new_account.account_name = "Amazon {0}".format(name)
 			new_account.company = self.amz_setting.company
 			new_account.parent_account = self.amz_setting.market_place_account_group
 			new_account.insert(ignore_permissions=True)
@@ -94,9 +93,6 @@ class AmazonRepository:
 		financial_events_payload = self.call_sp_api_method(
 			sp_api_method=finances.list_financial_events_by_order_id, order_id=order_id
 		)
-		
-		if financial_events_payload is None:
-			return {"charges": [], "fees": []}
 
 		charges_and_fees = {"charges": [], "fees": []}
 
@@ -151,9 +147,6 @@ class AmazonRepository:
 				order_id=order_id,
 				next_token=next_token,
 			)
-			
-			if financial_events_payload is None:
-			   return {"charges": [], "fees": []}
 
 		return charges_and_fees
 
@@ -278,7 +271,9 @@ class AmazonRepository:
 
 	def get_order_items(self, order_id) -> list:
 		orders = self.get_orders_instance()
-		order_items_payload = self.call_sp_api_method(sp_api_method=orders.get_order_items, order_id=order_id)
+		order_items_payload = self.call_sp_api_method(
+			sp_api_method=orders.get_order_items, order_id=order_id
+		)
 
 		final_order_items = []
 		warehouse = self.amz_setting.warehouse
@@ -306,9 +301,7 @@ class AmazonRepository:
 				break
 
 			order_items_payload = self.call_sp_api_method(
-				sp_api_method=orders.get_order_items,
-				order_id=order_id,
-				next_token=next_token,
+				sp_api_method=orders.get_order_items, order_id=order_id, next_token=next_token,
 			)
 
 		return final_order_items
@@ -340,8 +333,7 @@ class AmazonRepository:
 					new_contact = frappe.new_doc("Contact")
 					new_contact.first_name = order_customer_name
 					new_contact.append(
-						"links",
-						{"link_doctype": "Customer", "link_name": existing_customer_name},
+						"links", {"link_doctype": "Customer", "link_name": existing_customer_name},
 					)
 					new_contact.insert()
 
@@ -477,9 +469,7 @@ class AmazonRepository:
 				break
 
 			orders_payload = self.call_sp_api_method(
-				sp_api_method=orders.get_orders,
-				created_after=created_after,
-				next_token=next_token,
+				sp_api_method=orders.get_orders, created_after=created_after, next_token=next_token,
 			)
 
 		return sales_orders
