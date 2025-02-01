@@ -497,7 +497,7 @@ def validate_amazon_sp_api_credentials(**args) -> None:
 		api.get_auth()
 
 	except SPAPIError as e:
-		msg = f"<b>Error:</b> {e.error}<br/><b>Error Description:</b> {e.error_description}"
+		msg = f"<b>Error:</b> {e.error}<br/><b>Error Description:</b> {str(e)}"
 		frappe.throw(msg)
 
 
