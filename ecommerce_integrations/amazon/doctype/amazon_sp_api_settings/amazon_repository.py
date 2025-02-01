@@ -59,8 +59,7 @@ class AmazonRepository:
 				continue
 
 		for error in errors:
-			msg = f"<b>Error:</b> {
-				error}<br/><b>Error Description:</b> {errors.get(error)}"
+			msg = f"<b>Error:</b> {error}<br/><b>Error Description:</b> {errors.get(error)}"
 			frappe.msgprint(msg, alert=True, indicator="red")
 			frappe.log_error(
 				message=f"{error}: {errors.get(error)}",
@@ -78,8 +77,7 @@ class AmazonRepository:
 		return Finances(**self.instance_params)
 
 	def get_account(self, name) -> str:
-		account_name = frappe.db.get_value(
-			"Account", {"account_name": f"Amazon {name}"})
+		account_name = frappe.db.get_value("Account", {"account_name": f"Amazon {name}"})
 
 		if not account_name:
 			new_account = frappe.new_doc("Account")
@@ -96,7 +94,7 @@ class AmazonRepository:
 		financial_events_payload = self.call_sp_api_method(
 			sp_api_method=finances.list_financial_events_by_order_id, order_id=order_id
 		)
-
+		
 		if financial_events_payload is None:
 			return {"charges": [], "fees": []}
 
@@ -153,9 +151,9 @@ class AmazonRepository:
 				order_id=order_id,
 				next_token=next_token,
 			)
-
+			
 			if financial_events_payload is None:
-				return {"charges": [], "fees": []}
+			   return {"charges": [], "fees": []}
 
 		return charges_and_fees
 
@@ -167,8 +165,7 @@ class AmazonRepository:
 			item_group_name = amazon_item.get("AttributeSets")[0].get("ProductGroup")
 
 			if item_group_name:
-				item_group = frappe.db.get_value(
-					"Item Group", filters={"item_group_name": item_group_name})
+				item_group = frappe.db.get_value("Item Group", filters={"item_group_name": item_group_name})
 
 				if not item_group:
 					new_item_group = frappe.new_doc("Item Group")
@@ -223,8 +220,7 @@ class AmazonRepository:
 
 		def create_ecommerce_item(order_item, item_code) -> None:
 			ecommerce_item = frappe.new_doc("Ecommerce Item")
-			ecommerce_item.integration = frappe.get_meta(
-				"Amazon SP API Settings").module
+			ecommerce_item.integration = frappe.get_meta("Amazon SP API Settings").module
 			ecommerce_item.erpnext_item_code = item_code
 			ecommerce_item.integration_item_code = order_item["ASIN"]
 			ecommerce_item.sku = order_item["SellerSKU"]
@@ -275,16 +271,14 @@ class AmazonRepository:
 
 				break
 		else:
-			frappe.throw(
-				_("At least one field must be selected to find the item code."))
+			frappe.throw(_("At least one field must be selected to find the item code."))
 
 		item_code = self.create_item(order_item)
 		return item_code
 
 	def get_order_items(self, order_id) -> list:
 		orders = self.get_orders_instance()
-		order_items_payload = self.call_sp_api_method(
-			sp_api_method=orders.get_order_items, order_id=order_id)
+		order_items_payload = self.call_sp_api_method(sp_api_method=orders.get_order_items, order_id=order_id)
 
 		final_order_items = []
 		warehouse = self.amz_setting.warehouse
@@ -362,8 +356,7 @@ class AmazonRepository:
 
 				new_contact = frappe.new_doc("Contact")
 				new_contact.first_name = order_customer_name
-				new_contact.append(
-					"links", {"link_doctype": "Customer", "link_name": new_customer.name})
+				new_contact.append("links", {"link_doctype": "Customer", "link_name": new_customer.name})
 
 				new_contact.insert()
 
@@ -376,8 +369,7 @@ class AmazonRepository:
 				return
 			else:
 				make_address = frappe.new_doc("Address")
-				make_address.address_line1 = shipping_address.get(
-					"AddressLine1", "Not Provided")
+				make_address.address_line1 = shipping_address.get("AddressLine1", "Not Provided")
 				make_address.city = shipping_address.get("City", "Not Provided")
 				make_address.state = shipping_address.get("StateOrRegion").title()
 				make_address.pincode = shipping_address.get("PostalCode")
@@ -397,14 +389,12 @@ class AmazonRepository:
 					):
 						return address
 
-				make_address.append(
-					"links", {"link_doctype": "Customer", "link_name": customer_name})
+				make_address.append("links", {"link_doctype": "Customer", "link_name": customer_name})
 				make_address.address_type = "Shipping"
 				make_address.insert()
 
 		order_id = order.get("AmazonOrderId")
-		so = frappe.db.get_value("Sales Order", filters={
-		                         "amazon_order_id": order_id}, fieldname="name")
+		so = frappe.db.get_value("Sales Order", filters={"amazon_order_id": order_id}, fieldname="name")
 
 		if so:
 			return so
@@ -417,10 +407,8 @@ class AmazonRepository:
 			customer_name = create_customer(order)
 			create_address(order, customer_name)
 
-			delivery_date = dateutil.parser.parse(
-				order.get("LatestShipDate")).strftime("%Y-%m-%d")
-			transaction_date = dateutil.parser.parse(
-				order.get("PurchaseDate")).strftime("%Y-%m-%d")
+			delivery_date = dateutil.parser.parse(order.get("LatestShipDate")).strftime("%Y-%m-%d")
+			transaction_date = dateutil.parser.parse(order.get("PurchaseDate")).strftime("%Y-%m-%d")
 
 			so = frappe.new_doc("Sales Order")
 			so.amazon_order_id = order_id
