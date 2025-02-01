@@ -59,7 +59,8 @@ class AmazonRepository:
                 continue
 
         for error in errors:
-            msg = f"<b>Error:</b> {error}<br/><b>Error Description:</b> {errors.get(error)}"
+            msg = f"<b>Error:</b> {
+                error}<br/><b>Error Description:</b> {errors.get(error)}"
             frappe.msgprint(msg, alert=True, indicator="red")
             frappe.log_error(
                 message=f"{error}: {errors.get(error)}",
@@ -95,6 +96,9 @@ class AmazonRepository:
         financial_events_payload = self.call_sp_api_method(
             sp_api_method=finances.list_financial_events_by_order_id, order_id=order_id
         )
+
+        if financial_events_payload is None:
+            return {"charges": [], "fees": []}
 
         charges_and_fees = {"charges": [], "fees": []}
 
@@ -151,6 +155,9 @@ class AmazonRepository:
                 order_id=order_id,
                 next_token=next_token,
             )
+
+            if financial_events_payload is None:
+                return {"charges": [], "fees": []}
 
         return charges_and_fees
 
@@ -381,65 +388,13 @@ class AmazonRepository:
                 return
             else:
 
-                state_mapping = {
-                    "AN": "Andaman and Nicobar Islands",
-                    "AP": "Andhra Pradesh",
-                    "AR": "Arunachal Pradesh",
-                    "AS": "Assam",
-                    "BR": "Bihar",
-                    "CH": "Chandigarh",
-                    "CG": "Chhattisgarh",
-                    "DN": "Dadra and Nagar Haveli and Daman and Diu",
-                    "DL": "Delhi",
-                    "GA": "Goa",
-                    "GJ": "Gujarat",
-                    "HR": "Haryana",
-                    "HP": "Himachal Pradesh",
-                    "JK": "Jammu and Kashmir",
-                    "JH": "Jharkhand",
-                    "KA": "Karnataka",
-                    "KL": "Kerala",
-                    "LD": "Lakshadweep Islands",  # Choose only one entry for 'LD'
-                    "MP": "Madhya Pradesh",
-                    "MH": "Maharashtra",
-                    "MN": "Manipur",
-                    "ML": "Meghalaya",
-                    "MZ": "Mizoram",
-                    "NL": "Nagaland",
-                    "OR": "Odisha",
-                    "OC": "Other Countries",
-                    "OT": "Other Territory",
-                    "PY": "Puducherry",
-                    "PB": "Punjab",
-                    "RJ": "Rajasthan",
-                    "SK": "Sikkim",
-                    "TN": "Tamil Nadu",
-                    "TG": "Telangana",
-                    "TR": "Tripura",
-                    "UP": "Uttar Pradesh",
-                    "UK": "Uttarakhand",
-                    "WB": "West Bengal",
-                }
-
-                state_code = shipping_address.get("StateOrRegion")
-
-                state_name = state_mapping.get(state_code, state_code)
-
-                address_full = {
-                    "state": state_name.title(),
-                    "PostalCode": shipping_address.get("PostalCode"),
-                    "City": shipping_address.get("City", "Not Provided"),
-                    "AddressLine1":  shipping_address.get(
-                        "AddressLine1", "Not Provided")
-                }
-
                 make_address = frappe.new_doc("Address")
-                make_address.address_line1 = address_full.get(
+                make_address.address_line1 = shipping_address.get(
                     "AddressLine1", "Not Provided")
                 make_address.city = shipping_address.get(
                     "City", "Not Provided")
-                make_address.state = address_full.get(
-                    "state", "Not Provided")
+                make_address.state = shipping_address.get(
+                    "StateOrRegion", "Not Provided")
                 make_address.pincode = shipping_address.get("PostalCode")
 
                 filters = [
@@ -579,7 +534,8 @@ def validate_amazon_sp_api_credentials(**args) -> None:
         api.get_auth()
 
     except SPAPIError as e:
-        msg = f"<b>Error:</b> {e.error}<br/><b>Error Description:</b> {e.error_description}"
+        msg = f"<b>Error:</b> {e.error}<br/><b>Error Description:</b> {
+            e.error_description}"
         frappe.throw(msg)
 
 
