@@ -399,8 +399,7 @@ class AmazonRepository:
                     "JH": "Jharkhand",
                     "KA": "Karnataka",
                     "KL": "Kerala",
-                    "LD": "Ladakh",
-                    "LD": "Lakshadweep Islands",
+                    "LD": "Lakshadweep Islands",  # Choose only one entry for 'LD'
                     "MP": "Madhya Pradesh",
                     "MH": "Maharashtra",
                     "MN": "Manipur",
@@ -424,25 +423,22 @@ class AmazonRepository:
 
                 state_code = shipping_address.get("StateOrRegion")
 
-                if state_code and state_code in state_mapping:
-                    state_name = state_mapping[state_code]
-                else:
-                    state_name = state_code
+                state_name = state_mapping.get(state_code, state_code)
 
                 make_address = frappe.new_doc("Address")
                 make_address.address_line1 = shipping_address.get(
                     "AddressLine1", "Not Provided")
                 make_address.city = shipping_address.get(
                     "City", "Not Provided")
-                make_address.state = state_name.title()
+                make_address.state = state_name.title() if state_name else "Delhi"
                 make_address.pincode = shipping_address.get("PostalCode")
-                
+
                 address_full = {
-                   "state": state_name.title(), 
-                   "pincode": shipping_address.get("PostalCode"),
-                   "city": shipping_address.get("City", "Not Provided"),
-                   "address_line1":  shipping_address.get(
-                       "AddressLine1", "Not Provided")
+                    "state": state_name.title(),
+                    "pincode": shipping_address.get("PostalCode"),
+                    "city": shipping_address.get("City", "Not Provided"),
+                    "address_line1":  shipping_address.get(
+                        "AddressLine1", "Not Provided")
                 }
 
                 filters = [
